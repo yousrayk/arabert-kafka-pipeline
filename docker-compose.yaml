@@ -57,3 +57,22 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  gateway:
+    build: ./gateway
+    # Replays once and exits; started on demand so the stack can come up and
+    # be inspected first:  docker compose --profile replay up gateway
+    profiles: ["replay"]
+    depends_on:
+      producer:
+        condition: service_healthy
+    environment:
+      PRODUCER_URL: http://producer:5000/send
+      REPLAY_CSV: /data/${REPLAY_FILE:-replay.csv}
+      RATE_PER_SEC: "${RATE_PER_SEC:-20}"
+      MAX_MESSAGES: "${MAX_MESSAGES:-0}"
+      # Tag stamped on every message as `source`; eval can filter by it to
+      # score one run when several share the same sink.
+      DATASET_SOURCE: "${RUN_TAG:-astd}"
+    volumes:
+      - ./data:/data:ro
