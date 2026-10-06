@@ -1,0 +1,7 @@
+# torch is installed separately in the Dockerfile from the CPU-only wheel
+# index (the default CUDA wheel adds several GB to the image). Locally:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+confluent-kafka==2.15.1
+transformers==5.18.0
+arabert==1.0.1
+pytest==9.1.1

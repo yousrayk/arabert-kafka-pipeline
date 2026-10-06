@@ -76,3 +76,22 @@ services:
       DATASET_SOURCE: "${RUN_TAG:-astd}"
     volumes:
       - ./data:/data:ro
+
+  consumer_prediction:
+    build: ./consumer_prediction
+    depends_on:
+      topic-setup:
+        condition: service_completed_successfully
+    environment:
+      <<: *kafka-env
+      MODEL_PATH: /model
+      BATCH_SIZE: "16"
+      TORCH_THREADS: "4"
+      RELOAD_CHECK_SECONDS: "5"
+      RELOAD_SETTLE_SECONDS: "2"
+    volumes:
+      # Weights aren't committed (see .gitignore) — train or download them
+      # into ./models/arabert_sentiment first; see README "Model weights".
+      # Read-only: this service only ever watches the directory for changes.
+      - ./models/arabert_sentiment:/model:ro
+    restart: unless-stopped
