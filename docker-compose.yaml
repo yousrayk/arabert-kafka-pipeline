@@ -111,3 +111,31 @@ services:
       # Real sink, visible on the host at ./data (read by eval + dashboard).
       - ./data:/data
     restart: unless-stopped
+
+  alerting:
+    build: ./alerting
+    depends_on:
+      topic-setup:
+        condition: service_completed_successfully
+    environment:
+      <<: *kafka-env
+      WINDOW_SECONDS: "${ALERT_WINDOW_SECONDS:-60}"
+      NEGATIVE_SHARE_THRESHOLD: "${ALERT_THRESHOLD:-0.4}"
+      # Hysteresis: re-arm only once the share falls below this (default
+      # 0.8 x threshold), so a share hovering at the threshold alerts once.
+      REARM_BELOW: "${ALERT_REARM_BELOW:-}"
+      MIN_COUNT: "${ALERT_MIN_COUNT:-20}"
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    depends_on:
+      topic-setup:
+        condition: service_completed_successfully
+    environment:
+      <<: *kafka-env
+      JOINED_RESULTS_PATH: /data/joined_results.jsonl
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/data:ro
