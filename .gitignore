@@ -1,0 +1,13 @@
+/.venv
+**/.venv
+**/__pycache__
+**/.pytest_cache
+
+# Model weights are large binaries and don't belong in git history —
+# produce them with training/train.py (or download) per README's
+# "Model weights" section.
+/models/
+
+# Datasets are downloaded by scripts/prepare_dataset.py, and pipeline
+# outputs (joined results, eval reports) are regenerated on every run.
+/data/
