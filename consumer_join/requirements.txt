@@ -1,0 +1,2 @@
+confluent-kafka==2.15.1
+pytest==9.1.1

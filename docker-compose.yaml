@@ -95,3 +95,19 @@ services:
       # Read-only: this service only ever watches the directory for changes.
       - ./models/arabert_sentiment:/model:ro
     restart: unless-stopped
+  
+  consumer_join:
+    build: ./consumer_join
+    depends_on:
+      topic-setup:
+        condition: service_completed_successfully
+    environment:
+      <<: *kafka-env
+      JOINED_RESULTS_PATH: /data/joined_results.jsonl
+      # Unmatched halves older than this are evicted to reviews.dlq. Must
+      # comfortably exceed worst-case prediction lag (backlog / throughput).
+      JOIN_TTL_SECONDS: "300"
+    volumes:
+      # Real sink, visible on the host at ./data (read by eval + dashboard).
+      - ./data:/data
+    restart: unless-stopped
