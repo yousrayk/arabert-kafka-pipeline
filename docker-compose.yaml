@@ -42,3 +42,18 @@ services:
     volumes:
       - ./scripts/create_topics.sh:/create_topics.sh:ro
     entrypoint: ["bash", "/create_topics.sh"]
+
+  producer:
+    build: ./producer
+    depends_on:
+      topic-setup:
+        condition: service_completed_successfully
+    environment:
+      <<: *kafka-env
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
